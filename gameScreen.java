@@ -13,12 +13,22 @@ public class gameScreen extends JPanel implements Runnable {
     final int screenWidth = titlSize * maxScreenCol;
     final int screenHeight = titlSize * maxScreenRow;
 
+    int FPS = 60;
+
+    KeyHandler keyHandler = new KeyHandler();
     Thread gameThread;
+
+
+//    Default position if player
+    int playerX, playerY = 100;
+    int playerSpeed = 4;
 
     public gameScreen(){
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
+        this.addKeyListener(keyHandler);
+        this.setFocusable(true);
     }
 
     public void startGameThread(){
@@ -28,16 +38,47 @@ public class gameScreen extends JPanel implements Runnable {
 
     @Override
     public void run() {
-
+        double drawInterval = 1000000000 / FPS;
+        double nextDrawTime = System.nanoTime() + drawInterval;
         while(gameThread != null){
-
             update();
 
             repaint();
+
+
+            try {
+                double remainingTime = nextDrawTime - System.nanoTime();
+                remainingTime = remainingTime / 1000000;
+
+                if (remainingTime < 0){
+                    remainingTime = 0;
+                }
+
+                Thread.sleep((long) remainingTime);
+
+                nextDrawTime += drawInterval;
+
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    public void update(){}
+    public void update(){
+
+        if (keyHandler.upPressed == true){
+            playerY -= playerSpeed;
+        }
+        else if(keyHandler.downPressed == true){
+            playerY += playerSpeed;
+        }
+        else if(keyHandler.leftPressed == true){
+            playerX -= playerSpeed;
+        }
+        else if(keyHandler.rightPressed == true){
+            playerX += playerSpeed;
+        }
+    }
 
 
     public void paintComponent(Graphics g){
@@ -46,7 +87,7 @@ public class gameScreen extends JPanel implements Runnable {
         Graphics2D g2 = (Graphics2D)g;
 
         g2.setColor(Color.white);
-        g2.fillRect(100, 100, titlSize, titlSize);
+        g2.fillRect(playerX, playerY, titlSize, titlSize);
         g2.dispose();
     }
 }
