@@ -14,13 +14,16 @@ public class gameScreen extends JPanel implements Runnable {
     final int screenHeight = titlSize * maxScreenRow;
 
     int FPS = 60;
+    boolean showFPS = false;
+    int currentFPS = 0;
 
     KeyHandler keyHandler = new KeyHandler();
     Thread gameThread;
 
 
 //    Default position if player
-    int playerX, playerY = 100;
+    int playerX = 100;
+    int playerY = 100;
     int playerSpeed = 4;
 
     public gameScreen(){
@@ -38,6 +41,10 @@ public class gameScreen extends JPanel implements Runnable {
 
     @Override
     public void run() {
+
+        long drawCount = 0;
+        long lastTimer = System.currentTimeMillis();
+
         double drawInterval = 1000000000 / FPS;
         double nextDrawTime = System.nanoTime() + drawInterval;
         while(gameThread != null){
@@ -61,6 +68,15 @@ public class gameScreen extends JPanel implements Runnable {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+
+            drawCount++;
+
+            if (System.currentTimeMillis() - lastTimer >= 1000) {
+                currentFPS = (int) drawCount;
+                drawCount = 0;
+                lastTimer = System.currentTimeMillis();
+            }
+
         }
     }
 
@@ -78,6 +94,8 @@ public class gameScreen extends JPanel implements Runnable {
         else if(keyHandler.rightPressed == true){
             playerX += playerSpeed;
         }
+
+        showFPS = keyHandler.f1Pressed;
     }
 
 
@@ -88,6 +106,15 @@ public class gameScreen extends JPanel implements Runnable {
 
         g2.setColor(Color.white);
         g2.fillRect(playerX, playerY, titlSize, titlSize);
+
+        if (showFPS) {
+            g2.setColor(Color.yellow);
+            g2.setFont(new Font("Arial", Font.PLAIN, 20));
+            g2.drawString("FPS: " + currentFPS, 10, 20);
+        }
+
         g2.dispose();
+
+
     }
 }

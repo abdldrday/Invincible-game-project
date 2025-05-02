@@ -5,6 +5,7 @@ import java.security.PublicKey;
 public class KeyHandler implements KeyListener {
 
     public boolean upPressed, downPressed, leftPressed, rightPressed;
+    public boolean f1Pressed = false;
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -25,6 +26,9 @@ public class KeyHandler implements KeyListener {
         }
         if(code == KeyEvent.VK_D){
             rightPressed = true;
+        }
+        if (code == KeyEvent.VK_F1) {
+            f1Pressed = !f1Pressed; // Переключение состояния
         }
     }
 
