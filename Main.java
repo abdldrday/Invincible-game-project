@@ -10,7 +10,7 @@ public class Main {
         gameScreen gameScreen = new gameScreen();
         window.add(gameScreen);
 
-        window.pack(); 
+        window.pack();
 
         window.setLocationRelativeTo(null);
         window.setVisible(true);
