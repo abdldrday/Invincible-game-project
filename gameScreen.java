@@ -8,7 +8,7 @@ public class gameScreen extends JPanel implements Runnable {
 
 //    Screen settings
     final int originalTitle = 16;
-    final int scale = 4;
+    final int scale = 3;
 
     public final int titleSize = originalTitle * scale;
     public final int maxScreenCol = 16;
@@ -102,6 +102,21 @@ public class gameScreen extends JPanel implements Runnable {
             if (earthPlanet.active && earthPlanet.intersects(player.getX(), player.getY(), titleSize)) {
                 earthPlanet.active = false;
                 onEarth = true;
+            }
+
+            if (onEarth && keyHandler.spacePressed) {
+                int col = player.getX() / titleSize;
+                int row = player.getY() / titleSize;
+                if (tileManager.mapTileNum[col][row] == 3) {
+                    onEarth = false;
+                    try {
+                        backgroundImage = ImageIO.read(getClass().getResourceAsStream("/pfp/earth/space_background.png"));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    earthPlanet.active = true; // Снова активируем планету
+                }
             }
 
         } else {
