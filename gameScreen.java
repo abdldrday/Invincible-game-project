@@ -1,5 +1,8 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class gameScreen extends JPanel implements Runnable {
 
@@ -20,12 +23,8 @@ public class gameScreen extends JPanel implements Runnable {
     KeyHandler keyHandler = new KeyHandler();
     Thread gameThread;
     Player player = new Player(this, keyHandler);
+    BufferedImage backgroundImage;
 
-
-//    Default position if player
-    int playerX = 100;
-    int playerY = 100;
-    int playerSpeed = 4;
 
     public gameScreen(){
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -33,6 +32,12 @@ public class gameScreen extends JPanel implements Runnable {
         this.setDoubleBuffered(true);
         this.addKeyListener(keyHandler);
         this.setFocusable(true);
+
+        try {
+            backgroundImage = ImageIO.read(getClass().getResourceAsStream("/pfp/earth/space_background.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void startGameThread(){
@@ -93,6 +98,10 @@ public class gameScreen extends JPanel implements Runnable {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D)g;
+
+        if (backgroundImage != null) {
+            g2.drawImage(backgroundImage, 0, 0, screenWidth, screenHeight, null);
+        }
 
         player.draw(g2);
 
