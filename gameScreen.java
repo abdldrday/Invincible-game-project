@@ -5,13 +5,13 @@ public class gameScreen extends JPanel implements Runnable {
 
 //    Screen settings
     final int originalTitle = 16;
-    final int scale = 3;
+    final int scale = 4;
 
-    public final int titlSize = originalTitle * scale;
+    public final int titleSize = originalTitle * scale;
     final int maxScreenCol = 16;
     final int maxScreenRow = 12;
-    final int screenWidth = titlSize * maxScreenCol;
-    final int screenHeight = titlSize * maxScreenRow;
+    final int screenWidth = titleSize * maxScreenCol;
+    final int screenHeight = titleSize * maxScreenRow;
 
     int FPS = 60;
     boolean showFPS = false;

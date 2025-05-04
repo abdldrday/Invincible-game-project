@@ -24,7 +24,10 @@ public class Player extends Entity{
 
     public void getPlayerImg(){
         try {
+            up1 = ImageIO.read(getClass().getResourceAsStream("/pfp/allen-up1.png"));
             down1 = ImageIO.read(getClass().getResourceAsStream("/pfp/allen-down1.png"));
+            left1 = ImageIO.read(getClass().getResourceAsStream("/pfp/allen-left1.png"));
+            right1 = ImageIO.read(getClass().getResourceAsStream("/pfp/allen-right1.png"));
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -32,15 +35,19 @@ public class Player extends Entity{
 
     public void update(){
         if (keyHandler.upPressed == true){
+            direction = "up";
             y -= speed;
         }
         else if(keyHandler.downPressed == true){
+            direction = "down";
             y += speed;
         }
         else if(keyHandler.leftPressed == true){
+            direction = "left";
             x -= speed;
         }
         else if(keyHandler.rightPressed == true){
+            direction = "right";
             x += speed;
         }
     }
@@ -49,13 +56,22 @@ public class Player extends Entity{
         BufferedImage image = null;
 
         switch (direction){
+            case "up":
+                image = up1;
+                break;
             case "down":
                 image = down1;
+                break;
+            case "left":
+                image = left1;
+                break;
+            case "right":
+                image = right1;
                 break;
             }
 
 
-        g2.drawImage(image, x, y, gs.titlSize, gs.titlSize, null);
+        g2.drawImage(image, x, y, gs.titleSize, gs.titleSize, null);
         }
     }
 
