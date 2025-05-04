@@ -7,7 +7,7 @@ public class gameScreen extends JPanel implements Runnable {
     final int originalTitle = 16;
     final int scale = 3;
 
-    final int titlSize = originalTitle * scale;
+    public final int titlSize = originalTitle * scale;
     final int maxScreenCol = 16;
     final int maxScreenRow = 12;
     final int screenWidth = titlSize * maxScreenCol;
@@ -19,6 +19,7 @@ public class gameScreen extends JPanel implements Runnable {
 
     KeyHandler keyHandler = new KeyHandler();
     Thread gameThread;
+    Player player = new Player(this, keyHandler);
 
 
 //    Default position if player
@@ -82,18 +83,7 @@ public class gameScreen extends JPanel implements Runnable {
 
     public void update(){
 
-        if (keyHandler.upPressed == true){
-            playerY -= playerSpeed;
-        }
-        else if(keyHandler.downPressed == true){
-            playerY += playerSpeed;
-        }
-        else if(keyHandler.leftPressed == true){
-            playerX -= playerSpeed;
-        }
-        else if(keyHandler.rightPressed == true){
-            playerX += playerSpeed;
-        }
+        player.update();
 
         showFPS = keyHandler.f1Pressed;
     }
@@ -104,8 +94,7 @@ public class gameScreen extends JPanel implements Runnable {
 
         Graphics2D g2 = (Graphics2D)g;
 
-        g2.setColor(Color.white);
-        g2.fillRect(playerX, playerY, titlSize, titlSize);
+        player.draw(g2);
 
         if (showFPS) {
             g2.setColor(Color.yellow);
