@@ -11,19 +11,26 @@ public class gameScreen extends JPanel implements Runnable {
     final int scale = 4;
 
     public final int titleSize = originalTitle * scale;
-    final int maxScreenCol = 16;
-    final int maxScreenRow = 12;
-    final int screenWidth = titleSize * maxScreenCol;
-    final int screenHeight = titleSize * maxScreenRow;
+    public final int maxScreenCol = 16;
+    public final int maxScreenRow = 12;
+    public final int screenWidth = titleSize * maxScreenCol;
+    public final int screenHeight = titleSize * maxScreenRow;
 
     int FPS = 60;
     boolean showFPS = false;
     int currentFPS = 0;
+    boolean onEarth = false;
+
 
     KeyHandler keyHandler = new KeyHandler();
     Thread gameThread;
     Player player = new Player(this, keyHandler);
     BufferedImage backgroundImage;
+    EarthPlanet earthPlanet;
+
+
+    TileManager tileManager = new TileManager(this);
+
 
 
     public gameScreen(){
@@ -38,6 +45,8 @@ public class gameScreen extends JPanel implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        earthPlanet = new EarthPlanet(500, 350, titleSize * 3, titleSize * 3);
     }
 
     public void startGameThread(){
@@ -90,6 +99,11 @@ public class gameScreen extends JPanel implements Runnable {
         if (!player.isGameOver) {
             player.update();
             showFPS = keyHandler.f1Pressed;
+            if (earthPlanet.active && earthPlanet.intersects(player.getX(), player.getY(), titleSize)) {
+                earthPlanet.active = false;
+                onEarth = true;
+            }
+
         } else {
             if (keyHandler.enterPressed) {
                 restartGame();
@@ -100,6 +114,8 @@ public class gameScreen extends JPanel implements Runnable {
             }
         }
     }
+
+
 
     public void restartGame() {
         player = new Player(this, keyHandler);
@@ -112,6 +128,14 @@ public class gameScreen extends JPanel implements Runnable {
 
         if (backgroundImage != null) {
             g2.drawImage(backgroundImage, 0, 0, screenWidth, screenHeight, null);
+        }
+
+        if (earthPlanet != null) {
+            earthPlanet.draw(g2);
+        }
+
+        if (onEarth) {
+            tileManager.draw(g2); // рисуем землю поверх фона
         }
 
         player.draw(g2);

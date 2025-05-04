@@ -28,6 +28,16 @@ public class Player extends Entity {
         direction = "down";
     }
 
+    private int x, y;
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
     public void getPlayerImg() {
         try {
             up1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-up1.png"));
