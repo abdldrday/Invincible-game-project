@@ -86,13 +86,24 @@ public class gameScreen extends JPanel implements Runnable {
         }
     }
 
-    public void update(){
-
-        player.update();
-
-        showFPS = keyHandler.f1Pressed;
+    public void update() {
+        if (!player.isGameOver) {
+            player.update();
+            showFPS = keyHandler.f1Pressed;
+        } else {
+            if (keyHandler.enterPressed) {
+                restartGame();
+                keyHandler.enterPressed = false;
+            }
+            if (keyHandler.escPressed) {
+                System.exit(0);
+            }
+        }
     }
 
+    public void restartGame() {
+        player = new Player(this, keyHandler);
+    }
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
@@ -104,6 +115,9 @@ public class gameScreen extends JPanel implements Runnable {
         }
 
         player.draw(g2);
+        if (player.isGameOver) {
+            drawGameOverScreen(g2);
+        }
 
         if (showFPS) {
             g2.setColor(Color.yellow);
@@ -114,5 +128,18 @@ public class gameScreen extends JPanel implements Runnable {
         g2.dispose();
 
 
+    }
+
+    public void drawGameOverScreen(Graphics2D g2) {
+        g2.setColor(new Color(0, 0, 0, 180));
+        g2.fillRect(0, 0, screenWidth, screenHeight);
+
+        g2.setColor(Color.white);
+        g2.setFont(new Font("Arial", Font.BOLD, 48));
+        g2.drawString("GAME OVER", screenWidth / 2 - 150, screenHeight / 2 - 50);
+
+        g2.setFont(new Font("Arial", Font.PLAIN, 28));
+        g2.drawString("Press ENTER to Restart", screenWidth / 2 - 160, screenHeight / 2 + 20);
+        g2.drawString("Press ESC to Exit", screenWidth / 2 - 120, screenHeight / 2 + 60);
     }
 }

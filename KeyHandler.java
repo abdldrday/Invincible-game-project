@@ -2,12 +2,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
-
     public boolean upPressed, downPressed, leftPressed, rightPressed;
     public boolean f1Pressed = false;
     public boolean iPressed = false;
     public boolean hPressed = false;
     public boolean rPressed = false;
+    public boolean enterPressed = false;
+    public boolean escPressed = false;
 
     @Override
     public void keyTyped(KeyEvent e) {}
@@ -24,6 +25,8 @@ public class KeyHandler implements KeyListener {
         if (code == KeyEvent.VK_I) iPressed = !iPressed;
         if (code == KeyEvent.VK_H) hPressed = true;
         if (code == KeyEvent.VK_R) rPressed = true;
+        if (code == KeyEvent.VK_ENTER) enterPressed = true;
+        if (code == KeyEvent.VK_ESCAPE) escPressed = true;
     }
 
     @Override
@@ -36,5 +39,9 @@ public class KeyHandler implements KeyListener {
         if (code == KeyEvent.VK_D) rightPressed = false;
         if (code == KeyEvent.VK_H) hPressed = false;
         if (code == KeyEvent.VK_R) rPressed = false;
+        if (code == KeyEvent.VK_ENTER) enterPressed = false;
+        if (code == KeyEvent.VK_ESCAPE) escPressed = false;
     }
+
+
 }
