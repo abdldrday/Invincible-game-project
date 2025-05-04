@@ -10,6 +10,7 @@ public class Player extends Entity {
     public int maxHealth = 100;
     public int currentHealth = 100;
     public Inventory inventory = new Inventory();
+    public boolean isGameOver = false;
 
     public Player(gameScreen gs, KeyHandler keyHandler) {
         this.gs = gs;
@@ -39,6 +40,8 @@ public class Player extends Entity {
     }
 
     public void update() {
+        if (isGameOver) return;
+
         if (keyHandler.upPressed) {
             direction = "up";
             y -= speed;
@@ -66,7 +69,10 @@ public class Player extends Entity {
 
     public void takeDamage(int amount) {
         currentHealth -= amount;
-        if (currentHealth < 0) currentHealth = 0;
+        if (currentHealth <= 0) {
+            currentHealth = 0;
+            isGameOver = true;
+        }
     }
 
     public void restoreHealth() {
