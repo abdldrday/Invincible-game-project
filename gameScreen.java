@@ -3,6 +3,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.awt.event.*;
 
 public class gameScreen extends JPanel implements Runnable {
 
@@ -141,6 +142,11 @@ public class gameScreen extends JPanel implements Runnable {
 
         Graphics2D g2 = (Graphics2D)g;
 
+        if (keyHandler.inMainMenu) {
+            drawMainMenu((Graphics2D) g);
+            return;
+        }
+
         if (backgroundImage != null) {
             g2.drawImage(backgroundImage, 0, 0, screenWidth, screenHeight, null);
         }
@@ -181,4 +187,42 @@ public class gameScreen extends JPanel implements Runnable {
         g2.drawString("Press ENTER to Restart", screenWidth / 2 - 160, screenHeight / 2 + 20);
         g2.drawString("Press ESC to Exit", screenWidth / 2 - 120, screenHeight / 2 + 60);
     }
+
+    public void drawMainMenu(Graphics2D g) {
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, screenWidth, screenHeight);
+
+        g.setFont(new Font("Arial", Font.BOLD, 40));
+        g.setColor(Color.WHITE);
+        g.drawString("Invincible Game", screenWidth / 2 - 160, 150);
+
+        g.setFont(new Font("Arial", Font.PLAIN, 30));
+        for (int i = 0; i < 2; i++) {
+            if (keyHandler.menuSelection == i) {
+                g.setColor(Color.YELLOW);
+            } else {
+                g.setColor(Color.WHITE);
+            }
+            String text = (i == 0) ? "Start Game" : "Exit";
+            g.drawString(text, screenWidth / 2 - 100, 250 + i * 40);
+        }
+    }
+
+    public void mouseClicked(MouseEvent e) {
+        if (keyHandler.inMainMenu) {
+            int mouseX = e.getX();
+            int mouseY = e.getY();
+            for (int i = 0; i < 2; i++) {
+                int x = screenWidth / 2 - 100;
+                int y = 250 + i * 40;
+                if (mouseX >= x && mouseX <= x + 200 && mouseY >= y - 30 && mouseY <= y) {
+                    keyHandler.menuSelection = i;
+                    if (i == 0) keyHandler.inMainMenu = false;
+                    if (i == 1) System.exit(0);
+                }
+            }
+        }
+    }
+
+
 }
