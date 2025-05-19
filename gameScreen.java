@@ -29,6 +29,7 @@ public class gameScreen extends JPanel implements Runnable {
     Player player = new Player(this, keyHandler);
     BufferedImage backgroundImage;
     EarthPlanet earthPlanet;
+    BufferedImage mainMenuBackground;
 
 
     TileManager tileManager = new TileManager(this);
@@ -47,6 +48,13 @@ public class gameScreen extends JPanel implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        try {
+            mainMenuBackground = ImageIO.read(getClass().getResourceAsStream("/pfp/menu/main-menu.jpeg"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         earthPlanet = new EarthPlanet(500, 350, titleSize * 3, titleSize * 3);
     }
@@ -210,26 +218,22 @@ public class gameScreen extends JPanel implements Runnable {
     }
 
     public void drawMainMenu(Graphics2D g) {
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, screenWidth, screenHeight);
-
-        g.setFont(new Font("Arial", Font.BOLD, 40));
-        g.setColor(Color.WHITE);
-        g.drawString("Invincible Game", screenWidth / 2 - 160, 150);
-
+        // рисуем фон-картинку
+        if (mainMenuBackground != null) {
+            g.drawImage(mainMenuBackground, 0, 0, screenWidth, screenHeight, null);
+        } else {
+            g.setColor(new Color(0, 174, 239));
+            g.fillRect(0, 0, screenWidth, screenHeight);
+        }
         g.setFont(new Font("Arial", Font.PLAIN, 30));
-        for (int i = 0; i < 2; i++) {
-            if (keyHandler.menuSelection == i) {
-                g.setColor(Color.YELLOW);
-            } else {
-                g.setColor(Color.WHITE);
-            }
-            String text = (i == 0) ? "Start Game" : "Exit";
-            g.drawString(text, screenWidth / 2 - 100, 250 + i * 40);
+        String[] options = {"Start Game", "Exit"};
+        for (int i = 0; i < options.length; i++) {
+            g.setColor(keyHandler.menuSelection == i ? Color.YELLOW : Color.WHITE);
+            g.drawString(options[i], screenWidth / 2 - 60, 400 + i * 40);
         }
     }
 
-    public void mouseClicked(MouseEvent e) {
+        public void mouseClicked(MouseEvent e) {
         if (keyHandler.isPaused) {
             int mouseX = e.getX();
             int mouseY = e.getY();
@@ -255,9 +259,9 @@ public class gameScreen extends JPanel implements Runnable {
 
         g.setFont(new Font("Arial", Font.BOLD, 36));
         g.setColor(Color.WHITE);
-        g.drawString("Пауза", screenWidth / 2 - 60, 150);
+        g.drawString("Pause", screenWidth / 2 - 60, 150);
 
-        String[] options = { "Продолжить игру", "Выход" };
+        String[] options = { "Continue", "Exit" };
         g.setFont(new Font("Arial", Font.PLAIN, 30));
         for (int i = 0; i < options.length; i++) {
             if (keyHandler.pauseSelection == i) {
@@ -268,7 +272,7 @@ public class gameScreen extends JPanel implements Runnable {
             g.drawString(options[i], screenWidth / 2 - 120, 220 + i * 40);
         }
 
-        g.setComposite(original);  // ✅ вернули стандартную прозрачность
+        g.setComposite(original);
     }
 
 
