@@ -7,7 +7,7 @@ import java.awt.event.*;
 
 public class gameScreen extends JPanel implements Runnable {
 
-//    Screen settings
+    //    Screen settings
     final int originalTitle = 16;
     final int scale = 3;
 
@@ -16,6 +16,7 @@ public class gameScreen extends JPanel implements Runnable {
     public final int maxScreenRow = 12;
     public final int screenWidth = titleSize * maxScreenCol;
     public final int screenHeight = titleSize * maxScreenRow;
+    private float pauseAlpha = 0f;
 
     int FPS = 60;
     boolean showFPS = false;
@@ -97,6 +98,15 @@ public class gameScreen extends JPanel implements Runnable {
     }
 
     public void update() {
+        if (keyHandler.isPaused) {
+            if (pauseAlpha < 1f) pauseAlpha += 0.05f;
+        } else {
+            if (pauseAlpha > 0f) pauseAlpha -= 0.05f;
+        }
+
+        if (keyHandler.inMainMenu || keyHandler.isPaused) {
+            return;
+        }
         if (!player.isGameOver) {
             player.update();
             showFPS = keyHandler.f1Pressed;
@@ -129,6 +139,12 @@ public class gameScreen extends JPanel implements Runnable {
                 System.exit(0);
             }
         }
+
+        if (keyHandler.isPaused) {
+            if (pauseAlpha < 1f) pauseAlpha += 0.05f;
+        } else {
+            if (pauseAlpha > 0f) pauseAlpha -= 0.05f;
+        }
     }
 
 
@@ -142,8 +158,15 @@ public class gameScreen extends JPanel implements Runnable {
 
         Graphics2D g2 = (Graphics2D)g;
 
+        // Главное меню
         if (keyHandler.inMainMenu) {
-            drawMainMenu((Graphics2D) g);
+            drawMainMenu(g2);
+            return;
+        }
+
+        // Пауза
+        if (keyHandler.isPaused) {
+            drawPauseMenu(g2);
             return;
         }
 
@@ -171,8 +194,6 @@ public class gameScreen extends JPanel implements Runnable {
         }
 
         g2.dispose();
-
-
     }
 
     public void drawGameOverScreen(Graphics2D g2) {
@@ -209,19 +230,45 @@ public class gameScreen extends JPanel implements Runnable {
     }
 
     public void mouseClicked(MouseEvent e) {
-        if (keyHandler.inMainMenu) {
+        if (keyHandler.isPaused) {
             int mouseX = e.getX();
             int mouseY = e.getY();
             for (int i = 0; i < 2; i++) {
-                int x = screenWidth / 2 - 100;
-                int y = 250 + i * 40;
-                if (mouseX >= x && mouseX <= x + 200 && mouseY >= y - 30 && mouseY <= y) {
-                    keyHandler.menuSelection = i;
-                    if (i == 0) keyHandler.inMainMenu = false;
+                int x = screenWidth / 2 - 120;
+                int y = 220 + i * 40;
+                if (mouseX >= x && mouseX <= x + 240 && mouseY >= y - 30 && mouseY <= y) {
+                    keyHandler.pauseSelection = i;
+                    if (i == 0) keyHandler.isPaused = false;
                     if (i == 1) System.exit(0);
                 }
             }
         }
+    }
+
+    public void drawPauseMenu(Graphics2D g) {
+        Composite original = g.getComposite();
+        float alpha = Math.max(0f, Math.min(1f, pauseAlpha));
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+
+        g.setColor(new Color(0, 0, 0, 180));
+        g.fillRect(0, 0, screenWidth, screenHeight);
+
+        g.setFont(new Font("Arial", Font.BOLD, 36));
+        g.setColor(Color.WHITE);
+        g.drawString("Пауза", screenWidth / 2 - 60, 150);
+
+        String[] options = { "Продолжить игру", "Выход" };
+        g.setFont(new Font("Arial", Font.PLAIN, 30));
+        for (int i = 0; i < options.length; i++) {
+            if (keyHandler.pauseSelection == i) {
+                g.setColor(Color.YELLOW);
+            } else {
+                g.setColor(Color.WHITE);
+            }
+            g.drawString(options[i], screenWidth / 2 - 120, 220 + i * 40);
+        }
+
+        g.setComposite(original);  // ✅ вернули стандартную прозрачность
     }
 
 

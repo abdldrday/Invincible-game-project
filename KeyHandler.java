@@ -11,8 +11,8 @@ public class KeyHandler implements KeyListener {
     public boolean enterPressed = false;
     public boolean escPressed = false;
     public boolean spacePressed = false;
-
-    // Главное меню
+    public boolean isPaused = false;
+    public int pauseSelection = 0;
     public boolean inMainMenu = true;
     public int menuSelection = 0;
 
@@ -22,6 +22,12 @@ public class KeyHandler implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
+
+        // Важно: обработка ESC до inMainMenu
+        if (code == KeyEvent.VK_ESCAPE && !inMainMenu) {
+            isPaused = !isPaused;
+            return;
+        }
 
         if (inMainMenu) {
             if (code == KeyEvent.VK_UP) {
@@ -35,6 +41,20 @@ public class KeyHandler implements KeyListener {
                 if (menuSelection == 1) System.exit(0);
             } else if (code == KeyEvent.VK_ESCAPE) {
                 System.exit(0);
+            }
+            return;
+        }
+
+        if (isPaused) {
+            if (code == KeyEvent.VK_UP) {
+                pauseSelection--;
+                if (pauseSelection < 0) pauseSelection = 1;
+            } else if (code == KeyEvent.VK_DOWN) {
+                pauseSelection++;
+                if (pauseSelection > 1) pauseSelection = 0;
+            } else if (code == KeyEvent.VK_ENTER) {
+                if (pauseSelection == 0) isPaused = false;
+                if (pauseSelection == 1) System.exit(0);
             }
             return;
         }
