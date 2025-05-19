@@ -107,7 +107,7 @@ public class gameScreen extends JPanel implements Runnable {
             if (onEarth && keyHandler.spacePressed) {
                 int col = player.getX() / titleSize;
                 int row = player.getY() / titleSize;
-                if (tileManager.mapTileNum[col][row] == 3) {
+                if (tileManager.mapTileNum[col][row] == 2) {
                     onEarth = false;
                     try {
                         backgroundImage = ImageIO.read(getClass().getResourceAsStream("/pfp/earth/space_background.png"));
@@ -115,7 +115,7 @@ public class gameScreen extends JPanel implements Runnable {
                         e.printStackTrace();
                     }
 
-                    earthPlanet.active = true; // Снова активируем планету
+                    earthPlanet.active = true;
                 }
             }
 
@@ -150,7 +150,7 @@ public class gameScreen extends JPanel implements Runnable {
         }
 
         if (onEarth) {
-            tileManager.draw(g2); // рисуем землю поверх фона
+            tileManager.draw(g2);
         }
 
         player.draw(g2);
