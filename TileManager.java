@@ -16,7 +16,7 @@ public class TileManager {
         this.gs = gs;
         tile = new Tile[10];
 
-        mapTileNum = new int[gs.maxScreenCol][gs.maxScreenRow];
+        mapTileNum = new int[gs.maxWorldCol][gs.maxWorldRow];
         getTileIMG();
         loadMap();
 
@@ -49,10 +49,10 @@ public class TileManager {
             int col = 0;
             int row = 0;
 
-            while (col < gs.maxScreenCol && row < gs.maxScreenRow){
+            while (col < gs.maxWorldCol && row < gs.maxWorldRow){
                 String line = br.readLine();
 
-                while (col < gs.maxScreenCol){
+                while (col < gs.maxWorldCol){
                     String numbers[] = line.split(" ");
 
                     int num = Integer.parseInt(numbers[col]);
@@ -63,7 +63,7 @@ public class TileManager {
 
 
 
-                if(col == gs.maxScreenCol){
+                if(col == gs.maxWorldCol){
                     col = 0;
                     row++;
                 }
@@ -76,22 +76,24 @@ public class TileManager {
     }
 
     public void draw(Graphics2D g2){
-        int col = 0;
-        int row = 0;
-        int x = 0;
-        int y = 0;
+        int worldCol = 0;
+        int worldRow = 0;
 
-        while(col < gs.maxScreenCol && row < gs.maxScreenRow){
-            int tileNum = mapTileNum[col][row];
+        while(worldCol < gs.maxWorldCol && worldRow < gs.maxWorldRow){
+            int tileNum = mapTileNum[worldCol][worldRow];
 
-            g2.drawImage(tile[tileNum].image, x, y, gs.titleSize, gs.titleSize, null);
-            col++;
-            x += gs.titleSize;
-            if (col == gs.maxScreenCol){
-                col = 0;
-                x = 0;
-                row++;
-                y += gs.titleSize;
+            int worldX = worldCol * gs.titleSize;
+            int worldY = worldRow * gs.titleSize;
+            int screenX = worldX - gs.player.worldX + gs.player.screenX;
+            int screenY = worldY - gs.player.worldY + gs.player.screenY;
+
+            g2.drawImage(tile[tileNum].image, screenX, screenY, gs.titleSize, gs.titleSize, null);
+            worldCol++;
+
+            if (worldCol == gs.maxWorldCol){
+                worldCol = 0;
+                worldRow++;
+
 
             }
         }

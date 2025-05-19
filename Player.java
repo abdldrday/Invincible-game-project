@@ -7,6 +7,10 @@ public class Player extends Entity {
     gameScreen gs;
     KeyHandler keyHandler;
 
+    public final int screenX;
+    public final int screenY;
+
+
     public int maxHealth = 100;
     public int currentHealth = 100;
     public Inventory inventory = new Inventory();
@@ -15,6 +19,11 @@ public class Player extends Entity {
     public Player(gameScreen gs, KeyHandler keyHandler) {
         this.gs = gs;
         this.keyHandler = keyHandler;
+
+        screenX = gs.screenWidth / 2;
+        screenY = gs.screenHeight / 2;
+
+
         setDefValue();
         getPlayerImg();
 
@@ -22,8 +31,8 @@ public class Player extends Entity {
     }
 
     public void setDefValue() {
-        x = 100;
-        y = 100;
+        worldX = 100;
+        worldY = 100;
         speed = 4;
         direction = "down";
     }
@@ -31,11 +40,11 @@ public class Player extends Entity {
     private int x, y;
 
     public int getX() {
-        return x;
+        return worldX;
     }
 
     public int getY() {
-        return y;
+        return worldY;
     }
 
     public void getPlayerImg() {
@@ -54,16 +63,16 @@ public class Player extends Entity {
 
         if (keyHandler.upPressed) {
             direction = "up";
-            y -= speed;
+            worldY -= speed;
         } else if (keyHandler.downPressed) {
             direction = "down";
-            y += speed;
+            worldY += speed;
         } else if (keyHandler.leftPressed) {
             direction = "left";
-            x -= speed;
+            worldX -= speed;
         } else if (keyHandler.rightPressed) {
             direction = "right";
-            x += speed;
+            worldX  += speed;
         }
 
         if (keyHandler.hPressed) {
@@ -98,7 +107,7 @@ public class Player extends Entity {
             default -> down1;
         };
 
-        g.drawImage(image, x, y, gs.titleSize, gs.titleSize, null);
+        g.drawImage(image, screenX, screenY, gs.titleSize, gs.titleSize, null);
         drawHealthBar((Graphics2D) g);
 
         if (keyHandler.iPressed) {
