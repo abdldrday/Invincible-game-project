@@ -1,4 +1,3 @@
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -7,7 +6,6 @@ import java.awt.event.*;
 
 public class gameScreen extends JPanel implements Runnable {
 
-    //    Screen settings
     final int originalTitle = 16;
     final int scale = 3;
 
@@ -18,34 +16,23 @@ public class gameScreen extends JPanel implements Runnable {
     public final int screenHeight = titleSize * maxScreenRow;
     private float pauseAlpha = 0f;
 
-//    World settings
     public final int maxWorldCol = 50;
     public final int maxWorldRow = 50;
-    public final int worldWith = titleSize * maxWorldCol;
+    public final int worldWidth = titleSize * maxWorldCol;
     public final int worldHeight = titleSize * maxScreenRow;
-
-
-
 
     int FPS = 60;
     boolean showFPS = false;
     int currentFPS = 0;
-    boolean onEarth = false;
-
 
     KeyHandler keyHandler = new KeyHandler();
     Thread gameThread;
-    Player player = new Player(this, keyHandler);
-    BufferedImage backgroundImage;
-    EarthPlanet earthPlanet;
+    public Player player = new Player(this, keyHandler);
     BufferedImage mainMenuBackground;
-
 
     TileManager tileManager = new TileManager(this);
 
-
-
-    public gameScreen(){
+    public gameScreen() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
@@ -53,52 +40,36 @@ public class gameScreen extends JPanel implements Runnable {
         this.setFocusable(true);
 
         try {
-            backgroundImage = ImageIO.read(getClass().getResourceAsStream("/pfp/earth/space_background.png"));
+            mainMenuBackground = javax.imageio.ImageIO.read(getClass().getResourceAsStream("/pfp/menu/main-menu.jpeg"));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        try {
-            mainMenuBackground = ImageIO.read(getClass().getResourceAsStream("/pfp/menu/main-menu.jpeg"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        earthPlanet = new EarthPlanet(500, 350, titleSize * 3, titleSize * 3);
     }
 
-    public void startGameThread(){
+    public void startGameThread() {
         gameThread = new Thread(this);
         gameThread.start();
     }
 
     @Override
     public void run() {
-
         long drawCount = 0;
         long lastTimer = System.currentTimeMillis();
 
         double drawInterval = 1000000000 / FPS;
         double nextDrawTime = System.nanoTime() + drawInterval;
-        while(gameThread != null){
+        while (gameThread != null) {
             update();
-
             repaint();
-
 
             try {
                 double remainingTime = nextDrawTime - System.nanoTime();
                 remainingTime = remainingTime / 1000000;
 
-                if (remainingTime < 0){
-                    remainingTime = 0;
-                }
+                if (remainingTime < 0) remainingTime = 0;
 
                 Thread.sleep((long) remainingTime);
-
                 nextDrawTime += drawInterval;
-
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -110,7 +81,6 @@ public class gameScreen extends JPanel implements Runnable {
                 drawCount = 0;
                 lastTimer = System.currentTimeMillis();
             }
-
         }
     }
 
@@ -121,32 +91,11 @@ public class gameScreen extends JPanel implements Runnable {
             if (pauseAlpha > 0f) pauseAlpha -= 0.05f;
         }
 
-        if (keyHandler.inMainMenu || keyHandler.isPaused) {
-            return;
-        }
+        if (keyHandler.inMainMenu || keyHandler.isPaused) return;
+
         if (!player.isGameOver) {
             player.update();
             showFPS = keyHandler.f1Pressed;
-            if (earthPlanet.active && earthPlanet.intersects(player.getX(), player.getY(), titleSize)) {
-                earthPlanet.active = false;
-                onEarth = true;
-            }
-
-            if (onEarth && keyHandler.spacePressed) {
-                int col = player.getX() / titleSize;
-                int row = player.getY() / titleSize;
-                if (tileManager.mapTileNum[col][row] == 2) {
-                    onEarth = false;
-                    try {
-                        backgroundImage = ImageIO.read(getClass().getResourceAsStream("/pfp/earth/space_background.png"));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    earthPlanet.active = true;
-                }
-            }
-
         } else {
             if (keyHandler.enterPressed) {
                 restartGame();
@@ -156,50 +105,29 @@ public class gameScreen extends JPanel implements Runnable {
                 System.exit(0);
             }
         }
-
-        if (keyHandler.isPaused) {
-            if (pauseAlpha < 1f) pauseAlpha += 0.05f;
-        } else {
-            if (pauseAlpha > 0f) pauseAlpha -= 0.05f;
-        }
     }
-
-
 
     public void restartGame() {
         player = new Player(this, keyHandler);
     }
 
-    public void paintComponent(Graphics g){
+    public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
 
-        Graphics2D g2 = (Graphics2D)g;
-
-        // Главное меню
         if (keyHandler.inMainMenu) {
             drawMainMenu(g2);
             return;
         }
 
-        // Пауза
         if (keyHandler.isPaused) {
             drawPauseMenu(g2);
             return;
         }
 
-        if (backgroundImage != null) {
-            g2.drawImage(backgroundImage, 0, 0, screenWidth, screenHeight, null);
-        }
-
-        if (earthPlanet != null) {
-            earthPlanet.draw(g2);
-        }
-
-        if (onEarth) {
-            tileManager.draw(g2);
-        }
-
+        tileManager.draw(g2);
         player.draw(g2);
+
         if (player.isGameOver) {
             drawGameOverScreen(g2);
         }
@@ -227,7 +155,6 @@ public class gameScreen extends JPanel implements Runnable {
     }
 
     public void drawMainMenu(Graphics2D g) {
-        // рисуем фон-картинку
         if (mainMenuBackground != null) {
             g.drawImage(mainMenuBackground, 0, 0, screenWidth, screenHeight, null);
         } else {
@@ -239,22 +166,6 @@ public class gameScreen extends JPanel implements Runnable {
         for (int i = 0; i < options.length; i++) {
             g.setColor(keyHandler.menuSelection == i ? Color.YELLOW : Color.WHITE);
             g.drawString(options[i], screenWidth / 2 - 60, 400 + i * 40);
-        }
-    }
-
-        public void mouseClicked(MouseEvent e) {
-        if (keyHandler.isPaused) {
-            int mouseX = e.getX();
-            int mouseY = e.getY();
-            for (int i = 0; i < 2; i++) {
-                int x = screenWidth / 2 - 120;
-                int y = 220 + i * 40;
-                if (mouseX >= x && mouseX <= x + 240 && mouseY >= y - 30 && mouseY <= y) {
-                    keyHandler.pauseSelection = i;
-                    if (i == 0) keyHandler.isPaused = false;
-                    if (i == 1) System.exit(0);
-                }
-            }
         }
     }
 
@@ -270,19 +181,29 @@ public class gameScreen extends JPanel implements Runnable {
         g.setColor(Color.WHITE);
         g.drawString("Pause", screenWidth / 2 - 60, 150);
 
-        String[] options = { "Continue", "Exit" };
+        String[] options = {"Continue", "Exit"};
         g.setFont(new Font("Arial", Font.PLAIN, 30));
         for (int i = 0; i < options.length; i++) {
-            if (keyHandler.pauseSelection == i) {
-                g.setColor(Color.YELLOW);
-            } else {
-                g.setColor(Color.WHITE);
-            }
+            g.setColor(keyHandler.pauseSelection == i ? Color.YELLOW : Color.WHITE);
             g.drawString(options[i], screenWidth / 2 - 120, 220 + i * 40);
         }
 
         g.setComposite(original);
     }
 
-
+    public void mouseClicked(MouseEvent e) {
+        if (keyHandler.isPaused) {
+            int mouseX = e.getX();
+            int mouseY = e.getY();
+            for (int i = 0; i < 2; i++) {
+                int x = screenWidth / 2 - 120;
+                int y = 220 + i * 40;
+                if (mouseX >= x && mouseX <= x + 240 && mouseY >= y - 30 && mouseY <= y) {
+                    keyHandler.pauseSelection = i;
+                    if (i == 0) keyHandler.isPaused = false;
+                    if (i == 1) System.exit(0);
+                }
+            }
+        }
+    }
 }

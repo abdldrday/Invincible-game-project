@@ -51,18 +51,12 @@ public class TileManager {
 
             while (col < gs.maxWorldCol && row < gs.maxWorldRow){
                 String line = br.readLine();
-
                 while (col < gs.maxWorldCol){
                     String numbers[] = line.split(" ");
-
                     int num = Integer.parseInt(numbers[col]);
-
                     mapTileNum[col][row] = num;
                     col++;
                 }
-
-
-
                 if(col == gs.maxWorldCol){
                     col = 0;
                     row++;

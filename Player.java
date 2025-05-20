@@ -20,8 +20,8 @@ public class Player extends Entity {
         this.gs = gs;
         this.keyHandler = keyHandler;
 
-        screenX = gs.screenWidth / 2;
-        screenY = gs.screenHeight / 2;
+        screenX = gs.screenWidth/2;
+        screenY = gs.screenHeight/2;
 
 
         setDefValue();
@@ -31,8 +31,8 @@ public class Player extends Entity {
     }
 
     public void setDefValue() {
-        worldX = 100;
-        worldY = 100;
+        worldX = gs.titleSize * 23 - (gs.titleSize/2);
+        worldY = gs.titleSize * 21 - (gs.titleSize/2);
         speed = 4;
         direction = "down";
     }
