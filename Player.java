@@ -16,12 +16,16 @@ public class Player extends Entity {
     public Inventory inventory = new Inventory();
     public boolean isGameOver = false;
 
+    public Rectangle solidArea = new Rectangle(8, 8, 16, 16);
+    public boolean collisionOn = false;
+
+
     public Player(gameScreen gs, KeyHandler keyHandler) {
         this.gs = gs;
         this.keyHandler = keyHandler;
 
-        screenX = gs.screenWidth/2;
-        screenY = gs.screenHeight/2;
+        screenX = gs.screenWidth / 2 - gs.titleSize / 2;
+        screenY = gs.screenHeight / 2 - gs.titleSize / 2;
 
 
         setDefValue();
@@ -84,7 +88,54 @@ public class Player extends Entity {
             restoreHealth();
             keyHandler.rPressed = false;
         }
+
+        if (keyHandler.upPressed) {
+            direction = "up";
+            checkTileCollision();
+            if (!collisionOn) worldY -= speed;
+        }
+        else if (keyHandler.downPressed) {
+            direction = "down";
+            checkTileCollision();
+            if (!collisionOn) worldY += speed;
+        }
+        else if (keyHandler.leftPressed) {
+            direction = "left";
+            checkTileCollision();
+            if (!collisionOn) worldX -= speed;
+        }
+        else if (keyHandler.rightPressed) {
+            direction = "right";
+            checkTileCollision();
+            if (!collisionOn) worldX += speed;
+        }
+
+        if (worldX < 0) worldX = 0;
+        if (worldY < 0) worldY = 0;
+
+        if (worldX > gs.worldWidth - gs.titleSize)
+            worldX = gs.worldWidth - gs.titleSize;
+
+        if (worldY > gs.worldHeight - gs.titleSize)
+            worldY = gs.worldHeight - gs.titleSize;
+
+        checkCollision();
+
     }
+
+    public void checkCollision() {
+        int tileCol = (worldX + solidArea.x) / gs.titleSize;
+        int tileRow = (worldY + solidArea.y) / gs.titleSize;
+
+        int tileNum = gs.tileManager.mapTileNum[tileCol][tileRow];
+
+        if (gs.tileManager.tile[tileNum].collision) {
+            collisionOn = true;
+        } else {
+            collisionOn = false;
+        }
+    }
+
 
     public void takeDamage(int amount) {
         currentHealth -= amount;
@@ -97,6 +148,48 @@ public class Player extends Entity {
     public void restoreHealth() {
         currentHealth = maxHealth;
     }
+
+    public void checkTileCollision() {
+        int tileLeftCol = (worldX + solidArea.x) / gs.titleSize;
+        int tileRightCol = (worldX + solidArea.x + solidArea.width) / gs.titleSize;
+        int tileTopRow = (worldY + solidArea.y) / gs.titleSize;
+        int tileBottomRow = (worldY + solidArea.y + solidArea.height) / gs.titleSize;
+
+        int tileNum1, tileNum2;
+
+        switch (direction) {
+            case "up":
+                tileTopRow = (worldY + solidArea.y - speed) / gs.titleSize;
+                tileNum1 = gs.tileManager.mapTileNum[tileLeftCol][tileTopRow];
+                tileNum2 = gs.tileManager.mapTileNum[tileRightCol][tileTopRow];
+                break;
+            case "down":
+                tileBottomRow = (worldY + solidArea.y + solidArea.height + speed) / gs.titleSize;
+                tileNum1 = gs.tileManager.mapTileNum[tileLeftCol][tileBottomRow];
+                tileNum2 = gs.tileManager.mapTileNum[tileRightCol][tileBottomRow];
+                break;
+            case "left":
+                tileLeftCol = (worldX + solidArea.x - speed) / gs.titleSize;
+                tileNum1 = gs.tileManager.mapTileNum[tileLeftCol][tileTopRow];
+                tileNum2 = gs.tileManager.mapTileNum[tileLeftCol][tileBottomRow];
+                break;
+            case "right":
+                tileRightCol = (worldX + solidArea.x + solidArea.width + speed) / gs.titleSize;
+                tileNum1 = gs.tileManager.mapTileNum[tileRightCol][tileTopRow];
+                tileNum2 = gs.tileManager.mapTileNum[tileRightCol][tileBottomRow];
+                break;
+            default:
+                return;
+        }
+
+        // Проверка столкновений
+        if (gs.tileManager.tile[tileNum1].collision || gs.tileManager.tile[tileNum2].collision) {
+            collisionOn = true;
+        } else {
+            collisionOn = false;
+        }
+    }
+
 
     public void draw(Graphics g) {
         BufferedImage image = switch (direction) {
