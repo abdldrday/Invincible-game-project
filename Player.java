@@ -115,22 +115,25 @@ public class Player extends Entity {
         }
     }
 
-    public void drawHealthBar(Graphics2D g2) {
-        int barWidth = gs.titleSize;
-        int barHeight = 8;
-        int barX = x;
-        int barY = y - 12;
+    public void drawHealthBar(Graphics2D g) {
+        int barWidth = 100;
+        int barHeight = 10;
+        int x = screenX + (gs.titleSize - barWidth) / 2;
+        int y = screenY - 15;
 
-        double healthPercent = (double) currentHealth / maxHealth;
-        int filled = (int) (barWidth * healthPercent);
+        int filledWidth = (currentHealth * barWidth) / maxHealth;
+        if (filledWidth < 0) filledWidth = 0;
 
-        g2.setColor(Color.red);
-        g2.fillRect(barX, barY, barWidth, barHeight);
-        g2.setColor(Color.green);
-        g2.fillRect(barX, barY, filled, barHeight);
-        g2.setColor(Color.white);
-        g2.drawRect(barX, barY, barWidth, barHeight);
+        g.setColor(Color.DARK_GRAY);
+        g.fillRect(x, y, barWidth, barHeight);
+
+        g.setColor(Color.GREEN);
+        g.fillRect(x, y, filledWidth, barHeight);
+
+        g.setColor(Color.BLACK);
+        g.drawRect(x, y, barWidth, barHeight);
     }
+
 
     public void drawInventory(Graphics2D g2) {
         int x = 20;
