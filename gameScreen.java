@@ -30,6 +30,7 @@ public class gameScreen extends JPanel implements Runnable {
     Thread gameThread;
     public Player player = new Player(this, keyHandler);
     BufferedImage mainMenuBackground;
+    public Entity npc[] = new Entity[10];
 
     public int waveCount = 0;
     public boolean bossSpawned = false;
@@ -52,7 +53,10 @@ public class gameScreen extends JPanel implements Runnable {
         }
     }
 
+
     public void startGameThread() {
+        boss = new Boss(this);
+        bossSpawned = true;
         gameThread = new Thread(this);
         gameThread.start();
     }
@@ -112,11 +116,28 @@ public class gameScreen extends JPanel implements Runnable {
             }
         }
 
-        if (!bossSpawned && waveCount >= 5) {
-            boss = new Boss(this);
-            bossSpawned = true;
+        if (!player.isGameOver) {
+            player.update();
+
+            // Атака срабатывает только один раз при нажатии
+            if (keyHandler.spacePressed && !keyHandler.spaceHandled) {
+                player.attack();
+                keyHandler.spaceHandled = true;
+            }
+
+            if (!keyHandler.spacePressed) {
+                keyHandler.spaceHandled = false;
+            }
+
         }
 
+
+
+//        if (!bossSpawned && waveCount >= 5) {
+//            boss = new Boss(this);
+//            bossSpawned = true;
+//        }
+//
         if (bossSpawned && boss != null && boss.isAlive) {
             boss.update();
         }
@@ -152,6 +173,13 @@ public class gameScreen extends JPanel implements Runnable {
             g2.setFont(new Font("Arial", Font.PLAIN, 20));
             g2.drawString("FPS: " + currentFPS, 10, 20);
         }
+
+
+//        for(int i = 0; i < npc.length; i++){
+//            if (npc[i] != null){
+//                npc[i].draw(g2);
+//            }
+//        }
 
         if (bossSpawned && boss != null && boss.isAlive) {
             boss.draw(g2);

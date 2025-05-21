@@ -15,6 +15,7 @@ public class KeyHandler implements KeyListener {
     public int pauseSelection = 0;
     public boolean inMainMenu = true;
     public int menuSelection = 0;
+    public boolean spaceHandled = false;
 
     @Override
     public void keyTyped(KeyEvent e) {}
@@ -84,6 +85,6 @@ public class KeyHandler implements KeyListener {
         if (code == KeyEvent.VK_R) rPressed = false;
         if (code == KeyEvent.VK_ENTER) enterPressed = false;
         if (code == KeyEvent.VK_ESCAPE) escPressed = false;
-        if (code == KeyEvent.VK_SPACE) spacePressed = true;
+        if (code == KeyEvent.VK_SPACE) spacePressed = false;
     }
 }

@@ -12,12 +12,13 @@ public class Boss extends Entity {
 
 
     public Boss(gameScreen gs) {
+        super(gs);
         this.gs = gs;
         direction = "left";
         speed = 2;
         maxHealth = 300;
         currentHealth = maxHealth;
-        worldX = gs.titleSize * 45;
+        worldX = gs.titleSize * 25;
         worldY = gs.titleSize * 25;
         getBossImage();
     }
@@ -33,6 +34,9 @@ public class Boss extends Entity {
         }
     }
 
+    private long lastAttackTime = 0;
+    private long attackCooldown = 1500;
+
     public void update() {
         if (!isAlive) return;
 
@@ -41,28 +45,31 @@ public class Boss extends Entity {
 
         if (Math.abs(dx) < gs.titleSize * 10 && Math.abs(dy) < gs.titleSize * 10) {
             if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 0) {
-                    direction = "right";
-                    checkTileCollision();
-                    if (!collisionOn) worldX += speed;
-                } else {
-                    direction = "left";
-                    checkTileCollision();
-                    if (!collisionOn) worldX -= speed;
-                }
+                direction = dx > 0 ? "right" : "left";
             } else {
-                if (dy > 0) {
-                    direction = "down";
-                    checkTileCollision();
-                    if (!collisionOn) worldY += speed;
-                } else {
-                    direction = "up";
-                    checkTileCollision();
-                    if (!collisionOn) worldY -= speed;
+                direction = dy > 0 ? "down" : "up";
+            }
+
+            checkTileCollision();
+
+            if (!collisionOn) {
+                switch (direction) {
+                    case "up" -> worldY -= speed;
+                    case "down" -> worldY += speed;
+                    case "left" -> worldX -= speed;
+                    case "right" -> worldX += speed;
                 }
             }
         }
+
+
+        long now = System.currentTimeMillis();
+        if (now - lastAttackTime > attackCooldown) {
+            attackPlayer();
+            lastAttackTime = now;
+        }
     }
+
 
 
     public void draw(Graphics2D g2) {
@@ -122,5 +129,38 @@ public class Boss extends Entity {
 
         collisionOn = gs.tileManager.tile[tileNum1].collision || gs.tileManager.tile[tileNum2].collision;
     }
+
+    public void takeDamage(int damage) {
+        currentHealth -= damage;
+        if (currentHealth <= 0) {
+            currentHealth = 0;
+            isAlive = false;
+        }
+    }
+
+    public void attackPlayer() {
+        Rectangle bossHitbox = new Rectangle(
+                worldX + solidArea.x,
+                worldY + solidArea.y,
+                solidArea.width,
+                solidArea.height
+        );
+
+        Rectangle playerHitbox = new Rectangle(
+                gs.player.worldX + gs.player.solidArea.x,
+                gs.player.worldY + gs.player.solidArea.y,
+                gs.player.solidArea.width,
+                gs.player.solidArea.height
+        );
+
+        if (bossHitbox.intersects(playerHitbox)) {
+            gs.player.takeDamage(10);  // наносим урон
+        }
+    }
+
+
+
+
+
 
 }

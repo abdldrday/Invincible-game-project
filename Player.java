@@ -19,6 +19,7 @@ public class Player extends Entity {
     public boolean collisionOn = false;
 
     public Player(gameScreen gs, KeyHandler keyHandler) {
+        super(gs);
         this.gs = gs;
         this.keyHandler = keyHandler;
 
@@ -34,15 +35,15 @@ public class Player extends Entity {
     public void setDefValue() {
         worldX = gs.titleSize * 23 - (gs.titleSize / 2);
         worldY = gs.titleSize * 21 - (gs.titleSize / 2);
-        speed = 4;
+        speed = 5;
         direction = "down";
     }
 
     public void getPlayerImg() {
         try {
-            up1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-up1.png"));
-            down1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-down1.png"));
-            left1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-left1.png"));
+            up1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-down1.jpg"));
+            down1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-up1.jpg"));
+            left1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-left1.jpg"));
             right1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-right1.png"));
         } catch (IOException e) {
             e.printStackTrace();
@@ -68,12 +69,19 @@ public class Player extends Entity {
         }
 
         g2.drawImage(image, screenX, screenY, gs.titleSize, gs.titleSize, null);
+
+        int hpWidth = (int) ((currentHealth / (double) maxHealth) * (gs.titleSize * 4));
+        g2.setColor(Color.red);
+        g2.fillRect(20, 20, gs.titleSize * 4, 10);
+        g2.setColor(Color.green);
+        g2.fillRect(20, 20, hpWidth, 10);
     }
 
 
     public void update() {
         if (isGameOver) return;
 
+        // Движение игрока
         if (keyHandler.upPressed) {
             direction = "up";
             checkTileCollision();
@@ -92,16 +100,20 @@ public class Player extends Entity {
             if (!collisionOn) worldX += speed;
         }
 
-        // Ограничения: чтобы игрок не выходил за границы мира
+        // Ограничения по карте
         if (worldX < 0) worldX = 0;
         if (worldY < 0) worldY = 0;
 
-        // ✅ Ограничение справа и снизу с учётом ширины экрана
         if (worldX > gs.worldWidth - gs.screenWidth + screenX) {
             worldX = gs.worldWidth - gs.screenWidth + screenX;
         }
         if (worldY > gs.worldHeight - gs.screenHeight + screenY) {
             worldY = gs.worldHeight - gs.screenHeight + screenY;
+        }
+
+        // Проверяем, нажата ли кнопка атаки (пробел)
+        if (keyHandler.spacePressed) {
+            attack();
         }
     }
 
@@ -147,4 +159,41 @@ public class Player extends Entity {
     public int getY() {
         return worldY;
     }
+
+    public int attackPower = 100;
+
+    public void attack() {
+        if (gs.boss == null || !gs.boss.isAlive) return;
+
+
+        Rectangle attackArea = new Rectangle(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
+
+        switch (direction) {
+            case "up" -> attackArea.y -= gs.titleSize;
+            case "down" -> attackArea.y += gs.titleSize;
+            case "left" -> attackArea.x -= gs.titleSize;
+            case "right" -> attackArea.x += gs.titleSize;
+        }
+
+        Rectangle bossHitBox = new Rectangle(gs.boss.worldX + gs.boss.solidArea.x,
+                gs.boss.worldY + gs.boss.solidArea.y,
+                gs.boss.solidArea.width,
+                gs.boss.solidArea.height);
+
+        if (attackArea.intersects(bossHitBox)) {
+           gs.boss.takeDamage(attackPower);
+        }
+
+    }
+
+    public void takeDamage(int damage) {
+        currentHealth -= damage;
+        if (currentHealth < 0) currentHealth = 0;
+
+        if (currentHealth == 0) {
+            isGameOver = true;
+        }
+    }
+
+
 }
