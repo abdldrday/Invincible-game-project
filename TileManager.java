@@ -44,6 +44,22 @@ public class TileManager {
             tile[4] = new Tile();
             tile[4].image = ImageIO.read(getClass().getResourceAsStream("/pfp/earth/park.png"));
 
+            tile[5] = new Tile();
+            tile[5].image = ImageIO.read(getClass().getResourceAsStream("/pfp/earth/grass.png"));
+
+            tile[6] = new Tile();
+            tile[6].image = ImageIO.read(getClass().getResourceAsStream("/pfp/earth/crosswalk.png"));
+
+            tile[7] = new Tile();
+            tile[7].image = ImageIO.read(getClass().getResourceAsStream("/pfp/earth/cracked.png"));
+
+
+            tile[8] = new Tile();
+            tile[8].image = ImageIO.read(getClass().getResourceAsStream("/pfp/earth/ruins.png"));
+
+            tile[9] = new Tile();
+            tile[9].image = ImageIO.read(getClass().getResourceAsStream("/pfp/earth/metal.png"));
+
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -75,33 +91,47 @@ public class TileManager {
     }
 
 
-    public void draw(Graphics2D g2){
-        int worldCol = 0;
-        int worldRow = 0;
+    public void draw(Graphics2D g2) {
+        for (int row = 0; row < gs.maxWorldRow; row++) {
+            for (int col = 0; col < gs.maxWorldCol; col++) {
 
-        while(worldRow < gs.maxWorldRow) {
-            while(worldCol < gs.maxWorldCol) {
-                int tileNum = mapTileNum[worldCol][worldRow];
+                int tileNum = mapTileNum[col][row];
 
-                int worldX = worldCol * gs.titleSize;
-                int worldY = worldRow * gs.titleSize;
+                int worldX = col * gs.titleSize;
+                int worldY = row * gs.titleSize;
+
                 int screenX = worldX - gs.player.worldX + gs.player.screenX;
                 int screenY = worldY - gs.player.worldY + gs.player.screenY;
 
-                // ✅ ПРОВЕРКА: рисуем только то, что видно
-                if (worldX + gs.titleSize > gs.player.worldX - gs.player.screenX &&
-                        worldX - gs.titleSize < gs.player.worldX + gs.player.screenX &&
-                        worldY + gs.titleSize > gs.player.worldY - gs.player.screenY &&
-                        worldY - gs.titleSize < gs.player.worldY + gs.player.screenY) {
+                // Левый край карты
+                if (gs.player.worldX < gs.player.screenX) {
+                    screenX = worldX;
+                }
+                // Правый край карты
+                if (gs.player.worldX > gs.worldWidth - (gs.screenWidth - gs.player.screenX)) {
+                    screenX = gs.screenWidth - (gs.worldWidth - worldX);
+                }
+                // Верхний край карты
+                if (gs.player.worldY < gs.player.screenY) {
+                    screenY = worldY;
+                }
+                // Нижний край карты
+                if (gs.player.worldY > gs.worldHeight - (gs.screenHeight - gs.player.screenY)) {
+                    screenY = gs.screenHeight - (gs.worldHeight - worldY);
+                }
+
+                // Проверка видимости на экране
+                if (screenX + gs.titleSize > 0 && screenX < gs.screenWidth &&
+                        screenY + gs.titleSize > 0 && screenY < gs.screenHeight) {
 
                     g2.drawImage(tile[tileNum].image, screenX, screenY, gs.titleSize, gs.titleSize, null);
                 }
-
-                worldCol++;
             }
-            worldCol = 0;
-            worldRow++;
         }
     }
+
+
+
+
 
 }
