@@ -260,6 +260,7 @@ public class gameScreen extends JPanel implements Runnable {
             g2.drawString("I - Inventory", screenWidth / 2 - 100, 210);
             g2.drawString("ENTER - Close tooltip", screenWidth / 2 - 100, 250);
             g2.drawString("ESC - Pause menu", screenWidth / 2 - 100, 280);
+            g2.drawString("F1 - FPS counter", screenWidth / 2 - 100, 310);
             return;
         }
 
