@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.awt.event.*;
 
+
 public class gameScreen extends JPanel implements Runnable {
 
     final int originalTitle = 16;
@@ -29,6 +30,11 @@ public class gameScreen extends JPanel implements Runnable {
     Thread gameThread;
     public Player player = new Player(this, keyHandler);
     BufferedImage mainMenuBackground;
+
+    public int waveCount = 0;
+    public boolean bossSpawned = false;
+    public Boss boss;
+
 
     TileManager tileManager = new TileManager(this);
 
@@ -105,6 +111,15 @@ public class gameScreen extends JPanel implements Runnable {
                 System.exit(0);
             }
         }
+
+        if (!bossSpawned && waveCount >= 5) {
+            boss = new Boss(this);
+            bossSpawned = true;
+        }
+
+        if (bossSpawned && boss != null && boss.isAlive) {
+            boss.update();
+        }
     }
 
     public void restartGame() {
@@ -136,6 +151,10 @@ public class gameScreen extends JPanel implements Runnable {
             g2.setColor(Color.yellow);
             g2.setFont(new Font("Arial", Font.PLAIN, 20));
             g2.drawString("FPS: " + currentFPS, 10, 20);
+        }
+
+        if (bossSpawned && boss != null && boss.isAlive) {
+            boss.draw(g2);
         }
 
         g2.dispose();
