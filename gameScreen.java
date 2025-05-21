@@ -35,11 +35,14 @@ public class gameScreen extends JPanel implements Runnable {
     public int waveCount = 0;
     public boolean bossSpawned = false;
     public Boss boss;
+    public boolean isGameWon = false;
+    private static gameScreen instance;
+
 
 
     TileManager tileManager = new TileManager(this);
 
-    public gameScreen() {
+    private gameScreen() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
@@ -48,10 +51,23 @@ public class gameScreen extends JPanel implements Runnable {
 
         try {
             mainMenuBackground = javax.imageio.ImageIO.read(getClass().getResourceAsStream("/pfp/menu/main-menu.jpeg"));
+            System.out.println("Main menu background loaded!");
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
+        player = (Player) EntityFactory.createEntity("Player", this, keyHandler);
+
+
     }
+    public static gameScreen getInstance() {
+        if (instance == null) {
+            instance = new gameScreen();
+        }
+        return instance;
+    }
+
 
 
     public void startGameThread() {
@@ -116,10 +132,22 @@ public class gameScreen extends JPanel implements Runnable {
             }
         }
 
+        if (isGameWon) {
+            if (keyHandler.enterPressed) {
+                restartGame();
+                isGameWon = false;
+                keyHandler.enterPressed = false;
+            }
+            if (keyHandler.escPressed) {
+                System.exit(0);
+            }
+            return;
+        }
+
         if (!player.isGameOver) {
             player.update();
 
-            // Атака срабатывает только один раз при нажатии
+
             if (keyHandler.spacePressed && !keyHandler.spaceHandled) {
                 player.attack();
                 keyHandler.spaceHandled = true;
@@ -166,6 +194,7 @@ public class gameScreen extends JPanel implements Runnable {
 
         if (player.isGameOver) {
             drawGameOverScreen(g2);
+            return;
         }
 
         if (showFPS) {
@@ -216,6 +245,19 @@ public class gameScreen extends JPanel implements Runnable {
         }
     }
 
+    public void GameWon(Graphics2D g2) {
+        if (isGameWon) {
+            g2.setColor(new Color(0, 0, 0, 170)); // затемнённый фон
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("Arial", Font.BOLD, 48));
+            g2.drawString("You win!", screenWidth / 2 - 250, screenHeight / 2);
+            return;
+        }
+
+    }
+
     public void drawPauseMenu(Graphics2D g) {
         Composite original = g.getComposite();
         float alpha = Math.max(0f, Math.min(1f, pauseAlpha));
@@ -253,4 +295,18 @@ public class gameScreen extends JPanel implements Runnable {
             }
         }
     }
+
+    public void drawGameWonScreen(Graphics2D g2) {
+        g2.setColor(new Color(0, 0, 0, 180));
+        g2.fillRect(0, 0, screenWidth, screenHeight);
+
+        g2.setColor(Color.white);
+        g2.setFont(new Font("Arial", Font.BOLD, 48));
+        g2.drawString("WIN!", screenWidth / 2 - 120, screenHeight / 2 - 50);
+
+        g2.setFont(new Font("Arial", Font.PLAIN, 28));
+        g2.drawString("Press ENTER, to play again", screenWidth / 2 - 220, screenHeight / 2 + 20);
+        g2.drawString("Press ESC, to exit", screenWidth / 2 - 160, screenHeight / 2 + 60);
+    }
+
 }

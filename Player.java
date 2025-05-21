@@ -79,11 +79,10 @@ public class Player extends Entity {
 
 
     public void update() {
-        if (isGameOver) return;
+        if (gs.isGameWon || isGameOver) return;
 
-        // Движение игрока
-        if (keyHandler.upPressed) {
-            direction = "up";
+       if (keyHandler.upPressed) {
+           direction = "up";
             checkTileCollision();
             if (!collisionOn) worldY -= speed;
         } else if (keyHandler.downPressed) {
@@ -111,9 +110,9 @@ public class Player extends Entity {
             worldY = gs.worldHeight - gs.screenHeight + screenY;
         }
 
-        // Проверяем, нажата ли кнопка атаки (пробел)
-        if (keyHandler.spacePressed) {
-            attack();
+
+       if (keyHandler.spacePressed) {
+           attack();
         }
     }
 
@@ -160,7 +159,7 @@ public class Player extends Entity {
         return worldY;
     }
 
-    public int attackPower = 100;
+    public int attackPower = 50;
 
     public void attack() {
         if (gs.boss == null || !gs.boss.isAlive) return;

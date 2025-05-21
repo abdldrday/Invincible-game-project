@@ -8,13 +8,14 @@ public class Main {
         window.setResizable(false);
         window.setTitle("Invincible game");
 
-        gameScreen gameScreen = new gameScreen();
-        window.add(gameScreen);
+        gameScreen gamePanel = gameScreen.getInstance();
+        window.add(gamePanel);
         window.pack();
 
         window.setLocationRelativeTo(null);
         window.setVisible(true);
 
-        gameScreen.startGameThread();
+
+        gamePanel.startGameThread();
     }
 }

@@ -135,6 +135,7 @@ public class Boss extends Entity {
         if (currentHealth <= 0) {
             currentHealth = 0;
             isAlive = false;
+            gs.isGameWon = true;
         }
     }
 
