@@ -1,3 +1,5 @@
+import inventory.InventoryComponent;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -6,6 +8,8 @@ import java.awt.event.*;
 
 
 public class gameScreen extends JPanel implements Runnable {
+    public boolean attackHandled = false;
+    public boolean showVictory = false;
 
     final int originalTitle = 16;
     final int scale = 3;
@@ -21,12 +25,15 @@ public class gameScreen extends JPanel implements Runnable {
     public final int maxWorldRow = 50;
     public final int worldWidth = titleSize * maxWorldCol;
     public final int worldHeight = titleSize * maxWorldRow;
+    public Sound bgm = new Sound();
+    public Sound hitSound = new Sound();
+
 
     int FPS = 60;
     boolean showFPS = false;
     int currentFPS = 0;
 
-    KeyHandler keyHandler = new KeyHandler();
+    KeyHandler keyHandler = new KeyHandler(this);
     Thread gameThread;
     public Player player = new Player(this, keyHandler);
     BufferedImage mainMenuBackground;
@@ -37,6 +44,10 @@ public class gameScreen extends JPanel implements Runnable {
     public Boss boss;
     public boolean isGameWon = false;
     private static gameScreen instance;
+    public boolean showInventory = false;
+    public boolean showTutorial = true;
+    public boolean inMainMenu = true;
+
 
 
 
@@ -48,6 +59,10 @@ public class gameScreen extends JPanel implements Runnable {
         this.setDoubleBuffered(true);
         this.addKeyListener(keyHandler);
         this.setFocusable(true);
+        bgm.setFile("/pfp/sound/song.wav");
+        bgm.loop();
+        hitSound.setFile("/pfp/sound/punch.wav");
+
 
         try {
             mainMenuBackground = javax.imageio.ImageIO.read(getClass().getResourceAsStream("/pfp/menu/main-menu.jpeg"));
@@ -117,6 +132,22 @@ public class gameScreen extends JPanel implements Runnable {
             if (pauseAlpha > 0f) pauseAlpha -= 0.05f;
         }
 
+        if (showTutorial) {
+            if (keyHandler.tutorialClosed) {
+                showTutorial = false;
+            }
+            return;
+        }
+
+        if (showTutorial) {
+            if (keyHandler.tutorialClosed) {
+                showTutorial = false;
+            }
+            return; // ⛔ ничего не обновляем, пока окно открыто
+        }
+
+
+
         if (keyHandler.inMainMenu || keyHandler.isPaused) return;
 
         if (!player.isGameOver) {
@@ -157,6 +188,13 @@ public class gameScreen extends JPanel implements Runnable {
                 keyHandler.spaceHandled = false;
             }
 
+            if (keyHandler.iPressed) {
+                showInventory = true;
+            } else {
+                showInventory = false;
+            }
+
+
         }
 
 
@@ -167,7 +205,37 @@ public class gameScreen extends JPanel implements Runnable {
 //        }
 //
         if (bossSpawned && boss != null && boss.isAlive) {
-            boss.update();
+
+            if (bossSpawned && boss != null && boss.isAlive) {
+                boss.update();
+
+                // Урон по пробелу (однократно)
+                Rectangle bossArea = new Rectangle(boss.worldX, boss.worldY, titleSize, titleSize);
+                Rectangle playerArea = new Rectangle(player.worldX, player.worldY, titleSize, titleSize);
+
+                if (bossArea.intersects(playerArea) && keyHandler.spacePressed && !attackHandled) {
+                    hitSound.play();
+                    boss.takeDamage(20);
+                    attackHandled = true;
+                }
+
+                if (!keyHandler.spacePressed) {
+                    attackHandled = false;
+                }
+
+                // урон по пробелу при касании
+                if (bossArea.intersects(playerArea) && keyHandler.spacePressed && !attackHandled) {
+                    boss.takeDamage(1);
+                    attackHandled = true;
+                }
+
+                if (!keyHandler.spacePressed) {
+                    attackHandled = false;
+                }
+
+                // Проверка на столкновение
+            }
+
         }
     }
 
@@ -178,6 +246,25 @@ public class gameScreen extends JPanel implements Runnable {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+
+        if (showTutorial) {
+            g2.setColor(new Color(0, 0, 0, 200));
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("Arial", Font.BOLD, 24));
+            g2.drawString("Control", screenWidth / 2 - 70, 100);
+            g2.setFont(new Font("Arial", Font.PLAIN, 18));
+            g2.drawString("W / A / S / D - Movement", screenWidth / 2 - 100, 150);
+            g2.drawString("SPACE - Attack", screenWidth / 2 - 100, 180);
+            g2.drawString("I - Inventory", screenWidth / 2 - 100, 210);
+            g2.drawString("ENTER - Close tooltip", screenWidth / 2 - 100, 250);
+            g2.drawString("ESC - Pause menu", screenWidth / 2 - 100, 280);
+            return;
+        }
+
+        player.draw(g2);
+
 
         if (keyHandler.inMainMenu) {
             drawMainMenu(g2);
@@ -203,6 +290,21 @@ public class gameScreen extends JPanel implements Runnable {
             g2.drawString("FPS: " + currentFPS, 10, 20);
         }
 
+        if (showInventory) {
+            g2.setColor(new Color(0, 0, 0, 200));
+            g2.fillRoundRect(100, 100, 400, 300, 20, 20);
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("Arial", Font.BOLD, 20));
+            g2.drawString("INVENTORY", 250, 130);
+
+            int y = 160;
+            for (InventoryComponent item : player.inventory.getComponents()) {
+                g2.drawString("- " + item.getName() + " (" + item.getCount() + ")", 130, y);
+                y += 30;
+            }
+        }
+
+
 
 //        for(int i = 0; i < npc.length; i++){
 //            if (npc[i] != null){
@@ -212,6 +314,11 @@ public class gameScreen extends JPanel implements Runnable {
 
         if (bossSpawned && boss != null && boss.isAlive) {
             boss.draw(g2);
+        }
+
+        if (showVictory) {
+            drawGameWonScreen(g2);
+            return;
         }
 
         g2.dispose();
@@ -301,12 +408,24 @@ public class gameScreen extends JPanel implements Runnable {
         g2.fillRect(0, 0, screenWidth, screenHeight);
 
         g2.setColor(Color.white);
-        g2.setFont(new Font("Arial", Font.BOLD, 48));
-        g2.drawString("WIN!", screenWidth / 2 - 120, screenHeight / 2 - 50);
 
+        // Заголовок — крупный
+        g2.setFont(new Font("Arial", Font.BOLD, 48));
+        String title = "WIN!";
+        int titleX = (screenWidth - g2.getFontMetrics().stringWidth(title)) / 2;
+        g2.drawString(title, titleX, screenHeight / 2 - 50);
+
+        // Первая строка
         g2.setFont(new Font("Arial", Font.PLAIN, 28));
-        g2.drawString("Press ENTER, to play again", screenWidth / 2 - 220, screenHeight / 2 + 20);
-        g2.drawString("Press ESC, to exit", screenWidth / 2 - 160, screenHeight / 2 + 60);
+        String line1 = "You won the strongest character in the game";
+        int line1X = (screenWidth - g2.getFontMetrics().stringWidth(line1)) / 2;
+        g2.drawString(line1, line1X, screenHeight / 2 + 20);
+
+        // Вторая строка
+        String line2 = "Good luck, Champion";
+        int line2X = (screenWidth - g2.getFontMetrics().stringWidth(line2)) / 2;
+        g2.drawString(line2, line2X, screenHeight / 2 + 60);
     }
+
 
 }

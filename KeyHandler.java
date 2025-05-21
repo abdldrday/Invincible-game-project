@@ -2,6 +2,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
+
+    public KeyHandler(gameScreen gs) {
+        this.gs = gs;
+    }
+    public boolean restartGame = false;
+    public boolean exitGame = false;
+    gameScreen gs;
     public boolean upPressed = false, downPressed = false;
     public boolean leftPressed, rightPressed;
     public boolean f1Pressed = false;
@@ -16,17 +23,29 @@ public class KeyHandler implements KeyListener {
     public boolean inMainMenu = true;
     public int menuSelection = 0;
     public boolean spaceHandled = false;
+    public boolean tutorialClosed = false;
+
 
     @Override
     public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyPressed(KeyEvent e) {
+        if (gs.showVictory) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) restartGame = true;
+            if (e.getKeyCode() == KeyEvent.VK_ESCAPE) exitGame = true;
+            return;
+        }
         int code = e.getKeyCode();
 
         // Важно: обработка ESC до inMainMenu
         if (code == KeyEvent.VK_ESCAPE && !inMainMenu) {
             isPaused = !isPaused;
+            return;
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_ENTER && gs.showTutorial) {
+            tutorialClosed = true;
             return;
         }
 

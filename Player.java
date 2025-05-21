@@ -2,6 +2,10 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import inventory.Inventory;
+import inventory.Item;
+import inventory.InventoryComponent;
+
 
 public class Player extends Entity {
     gameScreen gs;
@@ -12,7 +16,7 @@ public class Player extends Entity {
 
     public int maxHealth = 100;
     public int currentHealth = 100;
-    public Inventory inventory = new Inventory();
+    public Inventory inventory = new Inventory("Main Inventory");
     public boolean isGameOver = false;
 
     public Rectangle solidArea = new Rectangle(8, 8, 16, 16);
@@ -29,7 +33,10 @@ public class Player extends Entity {
         setDefValue();
         getPlayerImg();
 
-        inventory.addItem(new Item("Crystal"));
+        inventory.add(new Item("Crystal"));
+        Inventory backpack = new Inventory("Backpack");
+        backpack.add(new Item("Potion"));
+        inventory.add(backpack);
     }
 
     public void setDefValue() {
@@ -41,9 +48,9 @@ public class Player extends Entity {
 
     public void getPlayerImg() {
         try {
-            up1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-down1.jpg"));
-            down1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-up1.jpg"));
-            left1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-left1.jpg"));
+            up1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-down1.png"));
+            down1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-up1.png"));
+            left1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-left1.png"));
             right1 = ImageIO.read(getClass().getResourceAsStream("/pfp/player/allen-right1.png"));
         } catch (IOException e) {
             e.printStackTrace();
@@ -79,10 +86,11 @@ public class Player extends Entity {
 
 
     public void update() {
+        if (gs.showVictory || gs.keyHandler.inMainMenu || gs.keyHandler.isPaused) return;
         if (gs.isGameWon || isGameOver) return;
 
-       if (keyHandler.upPressed) {
-           direction = "up";
+        if (keyHandler.upPressed) {
+            direction = "up";
             checkTileCollision();
             if (!collisionOn) worldY -= speed;
         } else if (keyHandler.downPressed) {
@@ -111,8 +119,8 @@ public class Player extends Entity {
         }
 
 
-       if (keyHandler.spacePressed) {
-           attack();
+        if (keyHandler.spacePressed) {
+            attack();
         }
     }
 
@@ -180,7 +188,7 @@ public class Player extends Entity {
                 gs.boss.solidArea.height);
 
         if (attackArea.intersects(bossHitBox)) {
-           gs.boss.takeDamage(attackPower);
+            gs.boss.takeDamage(attackPower);
         }
 
     }
